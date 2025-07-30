@@ -81,10 +81,16 @@ module "infra" {
   source                              = "./infra"
   region                              = local.region
   zone                                = local.zone
+  gke_region                          = local.gke_region
+  gke_zone                            = local.gke_zone
+  gpu_type                            = local.gpu_type
+  gpu_machine_type                    = local.gpu_machine_type
+  gpu_driver_version                  = local.gpu_driver_version
   project                             = var.project
   database_server_name                = local.database_server_name
   kubernetes_cluster_name             = local.kubernetes_cluster_name
   storage_bucket_name                 = local.storage_bucket_name
+  artifact_repo_name                  = local.artifact_repo_name
   metaflow_workload_identity_gsa_name = local.metaflow_workload_identity_gsa_name
   service_account_key_file            = local.service_account_key_file
 }
