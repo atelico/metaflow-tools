@@ -2,10 +2,9 @@
 
 ## Overview
 
-Metaflow is an ....
+Metaflow is an open-source framework for building and managing real-life machine learning workflows.
 
-In order to provide the its various functionality, Metaflow needs to deploy sclear
-everal pieces of infrastructure using Terraform.
+In order to provide the its various functionality, Metaflow needs to deploy several pieces of infrastructure using Terraform.
 
 The folloing infra is deployed in this build:
 - Google Kubernetes Engine (GKE): Handles compute (CPU & GPU) management
@@ -17,8 +16,8 @@ The folloing infra is deployed in this build:
 
 
 This guide provides instructions for 
-- [Setting up a new Metaflow Stack](/setting_up_a_new_stack)
-- [Setting up a new user](/new_user_setup)
+- [Setting up a new Metaflow Stack](#setting_up_a_new_stack)
+- [Setting up a new user](#new_user_setup)
 
 
 ## Pre Requisites
