@@ -156,7 +156,11 @@ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key>
-    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <string>$(dirname "$(which gke-gcloud-auth-plugin)"):$(dirname "$(which brew)"):/usr/local/bin:/usr/bin:/bin</string>
+    <key>KUBECONFIG</key>
+  	<string>$HOME/.kube/config</string>
+  	<key>CLOUDSDK_CONFIG</key>
+	<string>$HOME/.config/gcloud</string>
   </dict>
   <key>ProgramArguments</key>
   <array>
@@ -169,9 +173,9 @@ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>$HOME/metaflow-portforward.log</string>
+  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.log</string>
   <key>StandardErrorPath</key>
-  <string>$HOME/metaflow-portforward.err.log</string>
+  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.err.log</string>
 </dict>
 </plist>
 EOF

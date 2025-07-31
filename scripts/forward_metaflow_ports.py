@@ -141,7 +141,6 @@ def run(include_argo, include_airflow):
 
 
 def main():
-    print("Running metaflow port forwarder!")
     parser = argparse.ArgumentParser(description="Maintain port forwards to Kubernetes Metaflow stack")
     parser.add_argument('--include-argo', action='store_true',
                         help="Do port forward for argo server (needed for Argo UI)")
