@@ -139,11 +139,14 @@ At this point, the Metaflow stack should be up and running!
 	To set up port forwarding as a persistent process, do the following:
 
 	1. Move port-fowarding script to stable location
+
 	```
 	$ mkdir -p ~/Library/Application\ Support/metaflow
 	$ cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
 	```
+	
 	2.  Use `launchd` to run script in background
+
 	```
 	$ mkdir -p ~/Library/LaunchAgents
 
@@ -182,6 +185,7 @@ At this point, the Metaflow stack should be up and running!
 
 	$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
 	```
+	
 	3. Verify that it is running
 	
 	```
