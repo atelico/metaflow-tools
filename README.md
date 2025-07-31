@@ -1,127 +1,41 @@
-# Metaflow Set up Guide
+> **Note:** This repository is **not** for [Outerbounds](https://outerbounds.com) deployments. It is focused on **open-source (OSS) Metaflow** usage and tooling.
+> 
+[![](https://img.shields.io/badge/slack-@outerbounds-purple.svg?logo=slack )](http://slack.outerbounds.co/) 
+ 
+# ⚒️ Metaflow Admin Tools
 
-## Overview
+This repository contains various configuration files, tools and utilities for operating OSS [Metaflow](https://github.com/Netflix/metaflow) in production. See [Metaflow documentation](https://docs.metaflow.org) for more information about Metaflow architecture. Top level folders are structured as follows:
 
-Metaflow is an ....
+## Metaflow on AWS (/aws)
+### Metaflow Cloudformation template
+If you're not already using Terraform, this is the easiest way to get started on AWS. You can find the template under [aws/cloudformation](./aws/cloudformation) in this repository.
+This stack uses AWS Batch for compute and AWS Step Functions for orchestration.
 
-In order to provide the its various functionality, Metaflow needs to deploy sclear
-everal pieces of infrastructure using Terraform.
+### Sample Terraform templates for AWS
+Another deployment option is using Terraform. An end-to-end example can be found under [aws/terraform](./aws/terraform) in this repository. The example leverages the official Terraform module [outerbounds/terraform-aws-metaflow](https://registry.terraform.io/modules/outerbounds/metaflow/aws/latest) as a building block.
+This stack uses AWS Batch for compute and AWS Step Functions for orchestration.
 
-The folloing infra is deployed in this build:
-- Google Kubernetes Engine (GKE): Handles compute (CPU & GPU) management
-- Network Layer: Private subnetwork for internal communication between various infra components
-- Storage Bucket: Supports Metaflow auto versioning
-- Database: ???
-- Artifact Store: Allows users to push custom docker images, that can be retrieved by GKE compute instances
-- Service Accounts: Accounts with various permissions to access deployed infra
+## Metaflow on Azure (/azure)
+### Sample Terraform templates for Azure
+This is the quickest way to spin up a fully functional Metaflow stack on Azure. See details under [azure/terraform](./azure/terraform) in this repository.
+This stack uses Kubernetes (AKS) for compute and Argo Workflows for orchestration.
 
+## Metaflow on Nebius AI Cloud (/nebius)
+### Sample Terraform templates for Nebius AI Cloud
+This is another quickest way to spin up a fully functional Metaflow stack on Nebius. See details under [nebius/terraform](./nebius/terraform) in this repository.
+This stack uses Kubernetes (Managed Service for Kubernetes in Nebius AI Cloud) for compute and Argo Workflows for orchestration.
 
-This guide provides instructions for 
-- [Setting up a new Metaflow Stack](/setting_up_a_new_stack)
-- [Setting up a new user](/new_user_setup)
+## Metaflow services on Kubernetes (/k8s)
+### Helm Charts (alpha)
+We provide Helm charts to deploy Metaflow Metadata service and UI in a K8S cluster. This way you can use Metaflow without any AWS-specific dependencies on AWS except for having a S3-compatible object storage engine available. You can find them under [k8s/helm/metaflow](./k8s/helm/metaflow) in this repository.
 
+## Cloud agnostic resources (/common)
+### Sample Metaflow flow definitions
+Some Metaflow flows that could be used to test drive a Metaflow stack. Some of these flows
+are used to drive end-to-end CI coverage internally at Outerbounds.  They live under [common/sample_flows](./common/sample_flows)
 
-## Pre Requisites
+## Utility scripts (/scripts)
+Scripts that make life easier either deploying or using your new Metaflow stacks.
 
-This is needed for both new stack and new users.
-
-### Terraform Tooling
-
-- Install Terraform following [these instructions](https://learn.hashicorp.com/tutorials/terraform/install-cli)
-- Clone the [Atelico Metaflow Terraform Template](`https://github.com/atelico/metaflow-tools`)
-
-### GCP CLI
-
-- The GCP CLI, `gcloud`, will be used by terraform for authentication purposes
-- Install the `gcloud` CLI tool following [these instructions](https://cloud.google.com/sdk/docs/install-sdk)
-
-### kubectl
-
-- Standard CLI tool for working with Kubernetes clusters (GKE, in our case)
-- Install `kubectl` following [these instructions](https://kubernetes.io/docs/tasks/tools/#kubectl)
-
-
-## Setting up a new stack
-
-### Initialization and Authentication
-
-1. Create a new Project in Google Cloud Console, noting the PROJECT_ID.
-2. Log into GCP via CLI 
-	```
-	$ gcloud auth login
-	$ gcloud auth application-default login
-	```
-3. Set `gcloud` active project
-	```
-	$ gcloud config set project <PROJECT_ID>
-	```
-
-4. `cd` into `metaflow-tools/gcp/terraform` and initialize terraform
-	```
-	$ cd metaflow-tools/gcp/terraform
-	$ terraform init
-	```
-5. Create a file `FILE.tfvars` in `metaflow-tools/gcp/terraform` with following content. `FILE` can be any meaningful name, e.g., `metaflow.tfvars`.
-
-	```
-	org_prefix = "<ORG_PREFIX>"
-	project = "<GCP_PROJECT_ID>"
-	```
-
-### Applying Terraform
-
-There are three stages to the creation of the Metaflow stack:
-
-	1. Enabling GCP APIs (e.g. Compute Enginer API, Network API, ...)
-	2. Provisioning the Infrastructure: This instructs GCP to create the infrastructure components specified by terraform.
-	3. Deplying various Metaflow services to the GKE Cluster: Several micro services keep metaflow running (e.g. collecting metadata). This step initializes them on our newly provisioned GKE.
-
-
-1. Enable GCP APIs
-	
-	`$ terraform apply -target=module.apis -var-file=FILE.tfvars` 
-
-
-	#### Interlude: Requesting Compute Quotas 
-
-	In a new project, the default quotas may be low (and sometimes zero). In order to successfully deploy the stack, we need to verify and increase our quotas.
-
-
-	- GPUS: Increase the `GPUS_ALL_REGION` quota to at least 1. This is the miniumum and is usually accepted automatically. Anything greater might require reuqesting via different channels.
-	- By default, we use the `nvidia-l4` GPU, for which the default quota is 1. If the GPU pools are set up with different GPU types (e.g. `A100`) (See `gpu_type` in `~./variables.tf`), then we need to ensure that we have sufficient quota before intializing the stack. 
-	- Go to [here](https://console.cloud.google.com/iam-admin/quotas) to manage project quotas.
-
-
-2. Provision GCP Infra
-	
-	`$ terraform apply -target=module.infra -var-file=FILE.tfvars` 
-
-3.  Deploy Metaflow services
-
-	`$ terraform apply -target=module.services -var-file=FILE.tfvars` 
-	
-
-At this point, the Metaflow stack should be up and running!
-
-
-## New User Setup
-
-1. Login with gcloud CLI. Login as a sufficiently capabable user: 
-
-	`$ gcloud auth application-default login.`
-
-2. Configure your local Kubernetes context to point to the the right Kubernetes cluster:
-
-	`$ gcloud container clusters get-credentials gke-metaflow-default --region=<CLUSTER-REGION>`
-
-3. Configure Metaflow. Copy `config.json` to `~/.metaflowconfig/config.json`:
-	
-	`$ cp config.json ~/.metaflowconfig/config.json`
-
-4. Port Fowarding:
-
-	Due to the manner in which Metaflow set up the networking, there is no publicly accessible endpoint for the metaflow services running in the GKE. Metaflow has provided a script, `forward_metaflow_ports.py`, that performs the neccessary kubectl port forwarding. Since we do not want to run this everytime we run Metaflow, we run this as a background process.
-
-	See [here](https://docs.outerbounds.com/engineering/deployment/gcp-k8s/advanced/#authenticated-public-endpoints-for-metaflow-services) for more details.
-
-	
+# Questions?
+Talk to us on [Slack](http://http://slack.outerbounds.co/).
