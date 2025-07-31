@@ -138,56 +138,56 @@ At this point, the Metaflow stack should be up and running!
 
 	To set up port forwarding as a persistent process, do the following:
 
-		1. Move port-fowarding script to stable location
-		```
-		$ mkdir -p ~/Library/Application\ Support/metaflow
-		$ cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
-		```
-		2.  Use `launchd` to run script in background
-		```
-		$ mkdir -p ~/Library/LaunchAgents
+	1. Move port-fowarding script to stable location
+	```
+	$ mkdir -p ~/Library/Application\ Support/metaflow
+	$ cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
+	```
+	2.  Use `launchd` to run script in background
+	```
+	$ mkdir -p ~/Library/LaunchAgents
 
-		$ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
-		<?xml version="1.0" encoding="UTF-8"?>
-		<plist version="1.0">
-		<dict>
-		  <key>Label</key>
-		  <string>com.metaflow.portforward</string>
-		  <key>EnvironmentVariables</key>
-		  <dict>
-		    <key>PATH</key>
-		    <string>$(dirname "$(which gke-gcloud-auth-plugin)"):$(dirname "$(which brew)"):/usr/local/bin:/usr/bin:/bin</string>
-		    <key>KUBECONFIG</key>
-		  	<string>$HOME/.kube/config</string>
-		  	<key>CLOUDSDK_CONFIG</key>
-			<string>$HOME/.config/gcloud</string>
-		  </dict>
-		  <key>ProgramArguments</key>
-		  <array>
-		    <string>/usr/bin/python3</string>
-		    <string>-u</string>
-		    <string>$HOME/Library/Application Support/metaflow/forward_metaflow_ports.py</string>
-		  </array>
-		  <key>RunAtLoad</key>
-		  <true/>
-		  <key>KeepAlive</key>
-		  <true/>
-		  <key>StandardOutPath</key>
-		  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.log</string>
-		  <key>StandardErrorPath</key>
-		  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.err.log</string>
-		</dict>
-		</plist>
-		EOF
+	$ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
+	<?xml version="1.0" encoding="UTF-8"?>
+	<plist version="1.0">
+	<dict>
+	  <key>Label</key>
+	  <string>com.metaflow.portforward</string>
+	  <key>EnvironmentVariables</key>
+	  <dict>
+	    <key>PATH</key>
+	    <string>$(dirname "$(which gke-gcloud-auth-plugin)"):$(dirname "$(which brew)"):/usr/local/bin:/usr/bin:/bin</string>
+	    <key>KUBECONFIG</key>
+	  	<string>$HOME/.kube/config</string>
+	  	<key>CLOUDSDK_CONFIG</key>
+		<string>$HOME/.config/gcloud</string>
+	  </dict>
+	  <key>ProgramArguments</key>
+	  <array>
+	    <string>/usr/bin/python3</string>
+	    <string>-u</string>
+	    <string>$HOME/Library/Application Support/metaflow/forward_metaflow_ports.py</string>
+	  </array>
+	  <key>RunAtLoad</key>
+	  <true/>
+	  <key>KeepAlive</key>
+	  <true/>
+	  <key>StandardOutPath</key>
+	  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.log</string>
+	  <key>StandardErrorPath</key>
+	  <string>$HOME/Library/Application Support/metaflow/metaflow-portforward.err.log</string>
+	</dict>
+	</plist>
+	EOF
 
-		$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
-		```
-		3. Verify that it is running
-		
-		```
-		$ launchctl list | grep portforward
-		$ tail -f ~/metaflow-portforward.log
-		```
+	$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
+	```
+	3. Verify that it is running
+	
+	```
+	$ launchctl list | grep portforward
+	$ tail -f ~/metaflow-portforward.log
+	```
 
 
 
