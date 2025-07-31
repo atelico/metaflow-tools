@@ -163,7 +163,7 @@ Here a few steps to get started with the suggested image:
 	$ docker push <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest
 	```
 
-`METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from ~/.metaflowconfg/confg.json
+NB: `METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from `~/.metaflowconfg/confg.json`
 
 
 
