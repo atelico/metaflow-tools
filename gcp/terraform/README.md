@@ -1,93 +1,126 @@
-# A minimal viable Metaflow-on-GCP stack
+# Metaflow Set up Guide
 
-## What does it do?
-It provisions all necessary GCP resources. Main resources are:
-* Google Cloud Storage bucket
-* GKE cluster
-  It will also deploy Metaflow services onto the GKE cluster above.
+## Overview
 
-## Prerequisites
+Metaflow is an open-source framework for building and managing real-life machine learning workflows.
 
-* Install [terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
-* Install [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl).
-* Install [gcloud](https://cloud.google.com/sdk/gcloud) CLI.
-* `gcloud auth login` as a GCP account with sufficient privileges to administer necessary resources:
-    * GKE
-    * Google Cloud Storage bucket
-    * Computer networks
-    * IAM role assignments
-    * ...
-    * Note: If you are an owner of your GCP project already you should be good to go.
+In order to provide the its various functionality, Metaflow needs to deploy several pieces of infrastructure using Terraform.
 
-## Usage
-The templates are organized into two modules, `infra` and `services`.
+The folloing infra is deployed in this build:
+- Google Kubernetes Engine (GKE): Handles compute (CPU & GPU) management
+- Network Layer: Private subnetwork for internal communication between various infra components
+- Storage Bucket: Supports Metaflow auto versioning
+- Database: ???
+- Artifact Store: Allows users to push custom docker images, that can be retrieved by GKE compute instances
+- Service Accounts: Accounts with various permissions to access deployed infra
 
-Before you do anything, create a `FILE.tfvars` file with the following content (updating relevant values):
 
-    org_prefix = "<ORG_PREFIX>"
-    project = "<GCP_PROJECT_ID>"
-    db_generation_number = <DB_GENERATION_NUM>
+This guide provides instructions for 
+- [Setting up a new Metaflow Stack](#setting-up-a-new-stack)
+- [Setting up a new user](#new-user-setup)
 
-For `org_prefix`, choose a short and memorable alphanumeric string. It will be used for naming the Google Cloud Storage bucket, whose
-name must be globally unique across GCP.
 
-For `GCP_PROJECT_ID`, set the GCP project ID you wish to use.
+## Pre Requisites
 
-`DB_GENERATION_NUM` should be updated each time the DB instance is recreated. This helps generate unique DB instance
-names.  Backstory: DB instance names cannot repeat within 7 day window on GCP.
+This is needed for both new stack and new users.
 
-You may rename `FILE.tfvars` to a more friendly name appropriate for your project.  E.g. `metaflow.poc.tfvars`.
+### Terraform Tooling
 
-The variable assignments defined in this file will be passed to `terraform` CLI.
+- Install Terraform following [these instructions](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+- Clone the [Atelico Metaflow Terraform Template](`https://github.com/atelico/metaflow-tools`)
 
-Next, apply the `infra` module (creates GCP resources only).
+### GCP CLI
 
-    terraform apply -target="module.infra" -var-file=FILE.tfvars
+- The GCP CLI, `gcloud`, will be used by terraform for authentication purposes
+- Install the `gcloud` CLI tool following [these instructions](https://cloud.google.com/sdk/docs/install-sdk)
 
-Then, apply the `services` module (deploys Metaflow services to GKE)
+### kubectl
 
-    terraform apply -target="module.services" -var-file=FILE.tfvars
+- Standard CLI tool for working with Kubernetes clusters (GKE, in our case)
+- Install `kubectl` following [these instructions](https://kubernetes.io/docs/tasks/tools/#kubectl)
 
-The step above will output next steps for Metaflow end users.
 
-## Metaflow job orchestration options
-The recommended way to orchestrate Metaflow workloads on Kubernetes is via [Argo Workflows](https://docs.metaflow.org/going-to-production-with-metaflow/scheduling-metaflow-flows/scheduling-with-argo-workflows). However, Airflow is also supported as an alternative.
+## Setting up a new stack
 
-The template also provides the `deploy_airflow` and `deploy_argo` flags as variables. These are booleans that specify if [Airflow](https://airflow.apache.org/) or [Argo Workflows](https://argoproj.github.io/argo-workflows/) will be deployed in the Kubernetes cluster along with Metaflow related services. By default `deploy_argo` is set to __true__ and `deploy_airflow` is set to __false__.
-To change these, set them in your `FILE.tfvars` file (or else, via other [terraform variable](https://www.terraform.io/language/values/variables) passing mechanisms)
+### Initialization and Authentication
 
-### Argo Workflows
-Argo Workflows is installed by default on the AKS cluster as part of the `services` submodule. Setting the `deploy_argo` [variable](./variables.tf) will deploy Argo in the GKE cluster. No additional configuration is done in the `infra` module to support `argo`.
+1. Create a new Project in Google Cloud Console, noting the PROJECT_ID.
+2. Log into GCP via CLI 
+	```
+	$ gcloud auth login
+	$ gcloud auth application-default login
+	```
+3. Set `gcloud` active project
+	```
+	$ gcloud config set project <PROJECT_ID>
+	```
 
-After you have changed the value of `deploy_argo`, re-apply terraform for both [infra and services](#usage).
+4. `cd` into `metaflow-tools/gcp/terraform` and initialize terraform
+	```
+	$ cd metaflow-tools/gcp/terraform
+	$ terraform init
+	```
+5. Create a file `FILE.tfvars` in `metaflow-tools/gcp/terraform` with following content. `FILE` can be any meaningful name, e.g., `metaflow.tfvars`.
 
-### Airflow
+	```
+	org_prefix = "<ORG_PREFIX>"
+	project = "<GCP_PROJECT_ID>"
+	```
 
-**This is quickstart template only, not recommended for real production deployments**
+### Applying Terraform
 
-If `deploy_airflow`  is set to true, then the `services` module will deploy Airflow via a [helm chart](https://airflow.apache.org/docs/helm-chart/stable/index.html) into the kubernetes cluster (the one deployed by the `infra` module). 
+There are three stages to the creation of the Metaflow stack:
 
-The terraform template deploys Airflow configured with a `LocalExecutor`. Metaflow can work with any Airflow executor. This template deploys the `LocalExecutor` for simplicity.
+	1. Enabling GCP APIs (e.g. Compute Enginer API, Network API, ...)
+	2. Provisioning the Infrastructure: This instructs GCP to create the infrastructure components specified by terraform.
+	3. Deplying various Metaflow services to the GKE Cluster: Several micro services keep metaflow running (e.g. collecting metadata). This step initializes them on our newly provisioned GKE.
 
-After you have changed the value of `deploy_airflow`, reapply terraform for both [infra and services](#usage).
 
-#### Shipping Metaflow compiled DAGs to Airflow
-Airflow expects Python files with Airflow DAGS present in the [dags_folder](https://airflow.apache.org/docs/apache-airflow/2.2.0/configurations-ref.html#dags-folder). By default this terraform template uses the [defaults](https://airflow.apache.org/docs/helm-chart/stable/parameters-ref.html#airflow) set in the Airflow helm chart which is `{AIRFLOW_HOME}/dags` (`/opt/airflow/dags`).
+1. Enable GCP APIs
+	
+	`$ terraform apply -target=module.apis -var-file=FILE.tfvars` 
 
-The metaflow-tools repository also ships a [airflow_dag_upload.py](../../scripts/airflow_dag_upload.py) file that can help sync Airflow dag file generated by Metaflow to the Airflow scheduler _deployed by this template_. Under the hood [airflow_dag_upload.py](../../scripts/airflow_dag_upload.py) uses the `kubectl cp` command to copy files from local to the Airflow scheduler's container. Example of how to use the file:
-```
-python airflow_dag_upload.py my-dag.py /opt/airflow/dags/my-dag.py
-```
 
-## (Advanced) Terraform state management
-Terraform manages the state of GCP resources in [tfstate](https://www.terraform.io/language/state) files locally by default.
+	#### Interlude: Requesting Compute Quotas 
 
-If you plan to maintain the minimal stack for any significant period of time, it is highly
-recommended that these state files be stored in cloud storage (e.g. Google Cloud Storage) instead.
+	In a new project, the default quotas may be low (and sometimes zero). In order to successfully deploy the stack, we need to verify and increase our quotas.
 
-Some reasons include:
-* More than one person needs to administer the stack (using terraform). Everyone should work off
-  a single copy of tfstate.
-* You wish to mitigate the risk of data-loss on your local disk.
 
-For more details, see [Terraform docs](https://www.terraform.io/language/settings/backends/configuration).
+	- GPUS: Increase the `GPUS_ALL_REGION` quota to at least 1. This is the miniumum and is usually accepted automatically. Anything greater might require reuqesting via different channels.
+	- By default, we use the `nvidia-l4` GPU, for which the default quota is 1. If the GPU pools are set up with different GPU types (e.g. `A100`) (See `gpu_type` in `~./variables.tf`), then we need to ensure that we have sufficient quota before intializing the stack. 
+	- Go to [here](https://console.cloud.google.com/iam-admin/quotas) to manage project quotas.
+
+
+2. Provision GCP Infra
+	
+	`$ terraform apply -target=module.infra -var-file=FILE.tfvars` 
+
+3.  Deploy Metaflow services
+
+	`$ terraform apply -target=module.services -var-file=FILE.tfvars` 
+	
+
+At this point, the Metaflow stack should be up and running!
+
+
+## New User Setup
+
+1. Login with gcloud CLI. Login as a sufficiently capabable user: 
+
+	`$ gcloud auth application-default login.`
+
+2. Configure your local Kubernetes context to point to the the right Kubernetes cluster:
+
+	`$ gcloud container clusters get-credentials gke-metaflow-default --region=<CLUSTER-REGION>`
+
+3. Configure Metaflow. Copy `config.json` to `~/.metaflowconfig/config.json`:
+	
+	`$ cp config.json ~/.metaflowconfig/config.json`
+
+4. Port Fowarding:
+
+	Due to the manner in which Metaflow set up the networking, there is no publicly accessible endpoint for the metaflow services running in the GKE. Metaflow has provided a script, `forward_metaflow_ports.py`, that performs the neccessary kubectl port forwarding. Since we do not want to run this everytime we run Metaflow, we run this as a background process.
+
+	See [here](https://docs.outerbounds.com/engineering/deployment/gcp-k8s/advanced/#authenticated-public-endpoints-for-metaflow-services) for more details.
+
+	
