@@ -91,7 +91,8 @@ module "apis" {
                                           "servicenetworking.googleapis.com",
                                           "sqladmin.googleapis.com",
                                           "container.googleapis.com",
-                                          "artifactregistry.googleapis.com"
+                                          "artifactregistry.googleapis.com",
+                                          "orgpolicy.googleapis.com"
                                         ]
 }
 

@@ -7,6 +7,14 @@ resource google_service_account "metaflow_kubernetes_workload_identity_service_a
   }
 }
 
+resource "google_project_organization_policy" "allow_sa_key_creation" {
+  project = var.project
+  constraint = "constraints/iam.disableServiceAccountKeyCreation"
+  boolean_policy {
+    enforced = false
+  }
+}
+
 resource "google_service_account_key" "metaflow_kubernetes_workload_identity_service_account_key" {
   service_account_id = google_service_account.metaflow_kubernetes_workload_identity_service_account.name
 }
