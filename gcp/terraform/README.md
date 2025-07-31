@@ -140,14 +140,14 @@ At this point, the Metaflow stack should be up and running!
 
 	1. Move port-fowarding script to stable location
 	```
-	mkdir -p ~/Library/Application\ Support/metaflow
-	cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
+	$ mkdir -p ~/Library/Application\ Support/metaflow
+	$ cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
 	```
 	2.  Use `launchd` to run script in background
-```
-mkdir -p ~/Library/LaunchAgents
+	```
+$ mkdir -p ~/Library/LaunchAgents
 
-cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
+$ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
 <dict>
@@ -180,13 +180,13 @@ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
 </plist>
 EOF
 
-launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
-```
+$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
+	```
 	3. Verify that it is running
 	
 	```
-	launchctl list | grep portforward
-	tail -f ~/metaflow-portforward.log
+	$ launchctl list | grep portforward
+	$ tail -f ~/metaflow-portforward.log
 	```
 
 
