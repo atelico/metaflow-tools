@@ -48,6 +48,11 @@ data "google_sql_database_instance" "default" {
 
 }
 
+provider "google-beta" {
+  region = local.region
+  project = var.project
+}
+
 provider "kubernetes" {
   host  = "https://${data.google_container_cluster.default.endpoint}"
   token = data.google_client_config.default.access_token
@@ -77,7 +82,21 @@ resource "local_file" "kubeconfig" {
   filename = "${path.root}/kubeconfig"
 }
 
+module "apis" {
+  source                              = "./apis"
+  project                             = var.project
+  api_list                            = [
+                                          "cloudresourcemanager.googleapis.com",
+                                          "compute.googleapis.com",
+                                          "servicenetworking.googleapis.com",
+                                          "sqladmin.googleapis.com",
+                                          "container.googleapis.com",
+                                          "artifactregistry.googleapis.com"
+                                        ]
+}
+
 module "infra" {
+  depends_on                          = [module.apis]
   source                              = "./infra"
   region                              = local.region
   zone                                = local.zone
