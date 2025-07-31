@@ -15,7 +15,7 @@ The folloing infra is deployed in this build:
 - Service Accounts: Accounts with various permissions to access deployed infra
 
 
-This guide provides instructions for 
+This guide provides instructions for:
 - [Setting up a new Metaflow Stack](#setting-up-a-new-stack)
 - [Setting up a new user](#new-user-setup)
 
@@ -27,7 +27,7 @@ This is needed for both new stack and new users.
 ### Terraform Tooling
 
 - Install Terraform following [these instructions](https://learn.hashicorp.com/tutorials/terraform/install-cli)
-- Clone the [Atelico Metaflow Terraform Template](`https://github.com/atelico/metaflow-tools`)
+- Clone the [Atelico Metaflow Terraform Template](https://github.com/atelico/metaflow-tools)
 
 ### GCP CLI
 
@@ -71,12 +71,13 @@ This is needed for both new stack and new users.
 
 There are three stages to the creation of the Metaflow stack:
 
-	1. Enabling GCP APIs (e.g. Compute Enginer API, Network API, ...)
-	2. Provisioning the Infrastructure: This instructs GCP to create the infrastructure components specified by terraform.
-	3. Deplying various Metaflow services to the GKE Cluster: Several micro services keep metaflow running (e.g. collecting metadata). This step initializes them on our newly provisioned GKE.
+1. Enabling GCP APIs (e.g. Compute Enginer API, Network API, ...)
+2. Provisioning the Infrastructure: This instructs GCP to create the infrastructure components specified by terraform.
+3. Deplying various Metaflow services to the GKE Cluster: Several micro services keep metaflow running (e.g. collecting metadata). This step initializes them on our newly provisioned GKE.
 
+---
 
-1. Enable GCP APIs
+1. __Enable GCP APIs__
 	
 	`$ terraform apply -target=module.apis -var-file=FILE.tfvars` 
 
@@ -91,11 +92,11 @@ There are three stages to the creation of the Metaflow stack:
 	- Go to [here](https://console.cloud.google.com/iam-admin/quotas) to manage project quotas.
 
 
-2. Provision GCP Infra
+2. __Provision GCP Infra__
 	
 	`$ terraform apply -target=module.infra -var-file=FILE.tfvars` 
 
-3.  Deploy Metaflow services
+3.  __Deploy Metaflow services__
 
 	`$ terraform apply -target=module.services -var-file=FILE.tfvars` 
 	
@@ -122,5 +123,46 @@ At this point, the Metaflow stack should be up and running!
 	Due to the manner in which Metaflow set up the networking, there is no publicly accessible endpoint for the metaflow services running in the GKE. Metaflow has provided a script, `forward_metaflow_ports.py`, that performs the neccessary kubectl port forwarding. Since we do not want to run this everytime we run Metaflow, we run this as a background process.
 
 	See [here](https://docs.outerbounds.com/engineering/deployment/gcp-k8s/advanced/#authenticated-public-endpoints-for-metaflow-services) for more details.
+
+
+## Docker Images
+
+To run metaflow steps on a gpu node for machine learning purposes, a docker image with appropriate packages and drivers should be provided. Additonally metaflow natively calls `python` instead of `python3`, whereas many modern images only support `python3`, thus it is neccesary to create a symlink. We provide an example docker file in `/gcp/docker/Dockerfile` illustratiing this.
+
+
+1. Authenticate docker with Artifact Registry 
+	` $ gcloud auth configure-docker <REGION>-docker.pkg.dev`
+2. Build docker image
+	```
+	$ cd ../docker/
+	$ docker build -t huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow .
+	```
+3. Tag image for Artifact Registry
+	`$ docker tag huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
+4. Push image to registry
+	`$ docker push <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
+
+`METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from ~/.metaflowconfg/confg.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	
