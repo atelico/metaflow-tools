@@ -79,7 +79,9 @@ There are three stages to the creation of the Metaflow stack:
 
 1. __Enable GCP APIs__
 	
-	`$ terraform apply -target=module.apis -var-file=FILE.tfvars` 
+	```
+	$ terraform apply -target=module.apis -var-file=FILE.tfvars
+	```
 
 
 	#### Interlude: Requesting Compute Quotas 
@@ -94,11 +96,15 @@ There are three stages to the creation of the Metaflow stack:
 
 2. __Provision GCP Infra__
 	
-	`$ terraform apply -target=module.infra -var-file=FILE.tfvars` 
+	```
+	$ terraform apply -target=module.infra -var-file=FILE.tfvars
+	``` 
 
 3.  __Deploy Metaflow services__
 
-	`$ terraform apply -target=module.services -var-file=FILE.tfvars` 
+	```
+	$ terraform apply -target=module.services -var-file=FILE.tfvars
+	```
 	
 
 At this point, the Metaflow stack should be up and running!
@@ -108,15 +114,21 @@ At this point, the Metaflow stack should be up and running!
 
 1. Login with gcloud CLI. Login as a sufficiently capabable user: 
 
-	`$ gcloud auth application-default login.`
+	```
+	$ gcloud auth application-default login.
+	```
 
 2. Configure your local Kubernetes context to point to the the right Kubernetes cluster:
 
-	`$ gcloud container clusters get-credentials gke-metaflow-default --region=<CLUSTER-REGION>`
+	```
+	$ gcloud container clusters get-credentials gke-metaflow-default --region=<CLUSTER-REGION>
+	```
 
 3. Configure Metaflow. Copy `config.json` to `~/.metaflowconfig/config.json`:
 	
-	`$ cp config.json ~/.metaflowconfig/config.json`
+	```
+	$ cp config.json ~/.metaflowconfig/config.json
+	```
 
 4. Port Fowarding:
 
@@ -133,8 +145,9 @@ To run metaflow steps on a gpu node for machine learning purposes, a docker imag
 Here a few steps to get started with the suggested image:
 
 1. Authenticate docker with Artifact Registry:
-	
-	`$ gcloud auth configure-docker <REGION>-docker.pkg.dev`
+	```
+	$ gcloud auth configure-docker <REGION>-docker.pkg.dev
+	```
 2. Build docker image:
 	```
 	$ cd ../docker/
@@ -142,10 +155,13 @@ Here a few steps to get started with the suggested image:
 	```
 3. Tag image for Artifact Registry:
 
-`$ docker tag huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
+	```
+	$ docker tag huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest
+	```
 4. Push image to registry (this may take awhile):
-
-	`$ docker push <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
+	```
+	$ docker push <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest
+	```
 
 `METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from ~/.metaflowconfg/confg.json
 
