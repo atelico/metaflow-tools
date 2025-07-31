@@ -7,22 +7,14 @@ resource google_service_account "metaflow_kubernetes_workload_identity_service_a
   }
 }
 
-resource "google_project_organization_policy" "allow_sa_key_creation" {
-  project = var.project
-  constraint = "constraints/iam.disableServiceAccountKeyCreation"
-  boolean_policy {
-    enforced = false
-  }
-}
+//resource "google_service_account_key" //"metaflow_kubernetes_workload_identity_service_account_key" {
+//  service_account_id = google_service_account.metaflow_kubernetes_workload_identity_service_account.name
+//}
 
-resource "google_service_account_key" "metaflow_kubernetes_workload_identity_service_account_key" {
-  service_account_id = google_service_account.metaflow_kubernetes_workload_identity_service_account.name
-}
-
-resource "local_file" metaflow_gsa_key {
-  filename = var.service_account_key_file
-  content  = base64decode(google_service_account_key.metaflow_kubernetes_workload_identity_service_account_key.private_key)
-}
+//resource "local_file" metaflow_gsa_key {
+//  filename = var.service_account_key_file
+//  content  = base64decode(google_service_account_key.metaflow_kubernetes_workload_identity_service_account_key.private_key)
+//}
 
 resource "google_project_iam_member" "service_account_is_cloudsql_client" {
   provider = google-beta
