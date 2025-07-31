@@ -15,10 +15,12 @@ resource "google_project_iam_member" "control_plane_can_pull_from_artifact_regis
 }
 
 resource "google_project_organization_policy" "allow_external_ip" {
-  project = var.project
+  project    = var.project
   constraint = "constraints/compute.vmExternalIpAccess"
-  boolean_policy {
-    enforced = false
+  list_policy {
+    allow {
+      all = true
+    }
   }
 }
 
