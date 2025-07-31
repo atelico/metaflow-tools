@@ -133,15 +133,18 @@ To run metaflow steps on a gpu node for machine learning purposes, a docker imag
 Here a few steps to get started with the suggested image:
 
 1. Authenticate docker with Artifact Registry:
-	` $ gcloud auth configure-docker <REGION>-docker.pkg.dev`
+	
+	`$ gcloud auth configure-docker <REGION>-docker.pkg.dev`
 2. Build docker image:
 	```
 	$ cd ../docker/
 	$ docker build -t huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow .
 	```
 3. Tag image for Artifact Registry:
-	`$ docker tag huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
+
+`$ docker tag huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
 4. Push image to registry (this may take awhile):
+
 	`$ docker push <METAFLOW_DEFAULT_DOCKER_REGISTRY>/huggingface-pytorch-training-cu121.2-3.transformers.4-42.ubuntu2204.py310-metaflow:latest`
 
 `METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from ~/.metaflowconfg/confg.json
