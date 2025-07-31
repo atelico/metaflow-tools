@@ -14,6 +14,14 @@ resource "google_project_iam_member" "control_plane_can_pull_from_artifact_regis
   depends_on = [google_artifact_registry_repository.metaflow_docker_repo]
 }
 
+resource "google_project_organization_policy" "allow_external_ip" {
+  project = var.project
+  constraint = "constraints/compute.vmExternalIpAccess"
+  boolean_policy {
+    enforced = false
+  }
+}
+
 resource "google_container_cluster" "metaflow_kubernetes" {
   provider = google-beta
   name               = var.kubernetes_cluster_name
