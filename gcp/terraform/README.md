@@ -137,6 +137,56 @@ At this point, the Metaflow stack should be up and running!
 	See [here](https://docs.outerbounds.com/engineering/deployment/gcp-k8s/advanced/#authenticated-public-endpoints-for-metaflow-services) for more details.
 
 
+
+	1. Move port-fowarding script to stable location
+	```
+	mkdir -p ~/Library/Application\ Support/metaflow
+	cp forward_metaflow_ports.py ~/Library/Application\ Support/metaflow/
+	```
+	2.  Use `launchd` to run script in background
+```
+mkdir -p ~/Library/LaunchAgents
+
+cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.metaflow.portforward</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-u</string>
+    <string>$HOME/Library/Application Support/metaflow/forward_metaflow_ports.py</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>$HOME/metaflow-portforward.log</string>
+  <key>StandardErrorPath</key>
+  <string>$HOME/metaflow-portforward.err.log</string>
+</dict>
+</plist>
+EOF
+
+launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
+```
+	3. Verify that it is running
+	
+	```
+	launchctl list | grep portforward
+	tail -f ~/metaflow-portforward.log
+	```
+
+
+
 ## Docker Images
 
 To run metaflow steps on a gpu node for machine learning purposes, a docker image with appropriate packages and drivers should be provided. Additonally metaflow natively calls `python` instead of `python3`, whereas many modern images only support `python3`, thus it is neccesary to create a symlink. We provide an example docker file in `/gcp/docker/Dockerfile` illustratiing this.
