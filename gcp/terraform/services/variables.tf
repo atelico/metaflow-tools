@@ -80,3 +80,10 @@ variable "airflow_logs_bucket_path" {
   type = string
 }
 
+variable "artifact_repo_name" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}
