@@ -138,4 +138,7 @@ module "services" {
   deploy_argo                         = var.deploy_argo
   airflow_version                     = local.airflow_version
   airflow_frenet_secret               = local.airflow_frenet_secret
+  region                              = local.region
+  artifact_repo_name                  = local.artifact_repo_name
+
 }

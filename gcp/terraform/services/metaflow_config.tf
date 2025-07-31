@@ -12,6 +12,7 @@ resource "local_file" "metaflow_config_file" {
     "METAFLOW_ARGO_EVENTS_SERVICE_ACCOUNT" = "operate-workflow-sa"
     "METAFLOW_ARGO_EVENTS_EVENT"          = "metaflow-event"
     "METAFLOW_ARGO_EVENTS_WEBHOOK_URL"    = "http://argo-events-webhook-eventsource-svc.argo:12000/metaflow-event"
+    "METAFLOW_DEFAULT_DOCKER_REGISTRY"    = "${var.region}-docker.pkg.dev/${var.project}/${var.artifact_repo_name}"
   })
   filename = "./config.json"
 }
