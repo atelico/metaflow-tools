@@ -140,5 +140,6 @@ module "services" {
   airflow_frenet_secret               = local.airflow_frenet_secret
   region                              = local.region
   artifact_repo_name                  = local.artifact_repo_name
+  metaflow_kubernetes_gpu_tolerations = module.infra.metaflow_kubernetes_gpu_tolerations
 
 }

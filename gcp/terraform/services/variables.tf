@@ -87,3 +87,7 @@ variable "artifact_repo_name" {
 variable "region" {
   type = string
 }
+
+variable "metaflow_kubernetes_gpu_tolerations" {
+  type = string
+}

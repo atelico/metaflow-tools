@@ -8,7 +8,10 @@ output metaflow_kubernetes_gpu_tolerations {
       key      = taint.key
       operator = "Equal"
       value    = taint.value
-      effect   = lower(replace(taint.effect, "_", ""))
+      effect   = join(
+        "",
+        [for part in split("_", taint.effect) : title(lower(part))]
+      )
     }
   ])
   }
