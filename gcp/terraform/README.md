@@ -110,12 +110,22 @@ There are three stages to the creation of the Metaflow stack:
 At this point, the Metaflow stack should be up and running!
 
 
-## New User Setup
+## New User Setup (Admin)
+
+1. Navigate to Project [e.g. metaflow-poc] on Google Cloud Console 
+2. Navigate to IAM section
+3. Select "Grant Access"
+4. Under "New Principals" enter new user's email and select "Editor" Role under "Basic" Roles
+5. Done!
+
+
+
+## New User Setup (User)
 
 1. Login with gcloud CLI. Login as a sufficiently capabable user: 
 
 	```
-	$ gcloud auth application-default login.
+	$ gcloud auth application-default login
 	```
 
 2. Configure your local Kubernetes context to point to the the right Kubernetes cluster:
@@ -129,6 +139,8 @@ At this point, the Metaflow stack should be up and running!
 	```
 	$ cp config.json ~/.metaflowconfig/config.json
 	```
+
+	Note: Ask admin for `config.json`.
 
 4. Port Fowarding:
 
@@ -149,7 +161,9 @@ At this point, the Metaflow stack should be up and running!
 
 	```
 	$ mkdir -p ~/Library/LaunchAgents
+	```
 
+	```
 	$ cat <<EOF > ~/Library/LaunchAgents/com.metaflow.portforward.plist
 	<?xml version="1.0" encoding="UTF-8"?>
 	<plist version="1.0">
@@ -182,7 +196,9 @@ At this point, the Metaflow stack should be up and running!
 	</dict>
 	</plist>
 	EOF
-
+	```
+	
+	```
 	$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist
 	```
 	
@@ -225,7 +241,23 @@ NB: `METAFLOW_DEFAULT_DOCKER_REGISTRY` can be obtained from `~/.metaflowconfg/co
 
 
 
+## Troubleshooting 
 
+1. A common issue is requests timing out when launching a run (e.g `python myflow.py run`). There are generally two causses for this:
+
+	a. Authentication: Using gcloud, authentication token expires after some period of inactivity. Therefore run the following commands:
+
+	```
+	$ gcloud auth login
+	$ gcloud auth application-default login
+	```
+
+	b. Ocasionally the port-forwarding runs into some errors. Therefore, restart the port forwardining service by unloading and reloading the launchd daemon:
+
+	```
+	$ launchctl unload ~/Library/LaunchAgents/com.metaflow.portforward.plist 
+	$ launchctl load ~/Library/LaunchAgents/com.metaflow.portforward.plist 
+	```
 
 
 
