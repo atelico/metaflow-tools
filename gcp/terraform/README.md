@@ -122,6 +122,9 @@ At this point, the Metaflow stack should be up and running!
 
 ## New User Setup (User)
 
+0. Ensure that the necessary [pre-requisite tools](#pre-requisites) are installed.
+
+
 1. Login with gcloud CLI. Login as a sufficiently capabable user: 
 
 	```
