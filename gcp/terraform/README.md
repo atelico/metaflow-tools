@@ -16,8 +16,8 @@ The folloing infra is deployed in this build:
 
 
 This guide provides instructions for:
-- [Setting up a new Metaflow Stack](#setting-up-a-new-stack)
-- [Setting up a new user](#new-user-setup)
+- [Setting up a new Metaflow Stack](#new-user-setup-admin)
+- [Setting up a new user](#new-user-setup-user)
 
 
 ## Pre Requisites
